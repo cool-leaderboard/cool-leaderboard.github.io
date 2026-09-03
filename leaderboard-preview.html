@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cool Leaderboard</title>
+<meta name="description" content="Live Cool Coins and XP standings.">
+<meta property="og:title" content="Cool Leaderboard">
+<meta property="og:site_name" content="cool-leaderboard.github.io">
+<meta name="theme-color" content="#0b0518">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0518;
+    --panel: #150c28;
+    --panel-alt: #1a1030;
+    --line: #332553;
+    --gold: #ffcf3d;
+    --pink: #ff4fa8;
+    --cyan: #4fe3ff;
+    --text: #f5f0fd;
+    --text-dim: #9c8fc0;
+    --accent: var(--gold);
+    --accent-ink: #241705;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #241848 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 44px 18px 70px;
+  }
+
+  .wrap { max-width: 680px; margin: 0 auto; }
+
+  /* ---- Marquee hero ---- */
+  .marquee {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 30px 24px 26px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .bulb-row {
+    height: 8px;
+    background-image: radial-gradient(circle, var(--gold) 2.2px, transparent 2.6px);
+    background-size: 24px 8px;
+    background-repeat: repeat-x;
+    background-position: center;
+    opacity: 0.85;
+  }
+
+  .bulb-row.dim {
+    background-image: radial-gradient(circle, var(--line) 2px, transparent 2.4px);
+  }
+
+  .marquee-inner { padding: 26px 0 4px; }
+
+  .coin-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(155deg, var(--gold), #c79a2e);
+    font-size: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 0 0 5px rgba(255,207,61,0.1);
+  }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 26px;
+    line-height: 1.5;
+    margin: 0 0 14px;
+    color: var(--gold);
+    text-shadow: 2px 2px 0 var(--pink), 4px 4px 12px rgba(255,79,168,0.35);
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* ---- Toggle ---- */
+  .toggle {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin: 26px auto 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 4px;
+    width: fit-content;
+  }
+
+  .toggle button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 9px 18px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .toggle button.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* ---- Podium ---- */
+  .podium {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 22px;
+  }
+
+  .prize {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 10px 16px;
+    text-align: center;
+  }
+
+  .prize::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0; height: 8px;
+    background:
+      linear-gradient(-45deg, var(--bg) 5px, transparent 0) 0 0 / 10px 10px repeat-x,
+      linear-gradient(45deg, var(--bg) 5px, transparent 0) 0 0 / 10px 10px repeat-x;
+  }
+
+  .prize.gold-slot { order: 2; padding-top: 30px; border-color: var(--gold); box-shadow: 0 6px 24px rgba(255,207,61,0.1); }
+  .prize.silver-slot { order: 1; }
+  .prize.bronze-slot { order: 3; }
+
+  .prize-rank {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .prize-name {
+    font-weight: 600;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 6px;
+  }
+
+  .prize-stat {
+    font-weight: 700;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .prize-sub {
+    color: var(--text-dim);
+    font-size: 11.5px;
+    margin-top: 3px;
+  }
+
+  /* ---- Scoreboard list ---- */
+  .board {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding-top: 8px;
+    overflow: hidden;
+  }
+
+  .board::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0; height: 8px;
+    background:
+      linear-gradient(-45deg, var(--bg) 5px, transparent 0) 0 0 / 10px 10px repeat-x,
+      linear-gradient(45deg, var(--bg) 5px, transparent 0) 0 0 / 10px 10px repeat-x;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row:last-child { border-bottom: none; }
+  .row:nth-child(odd) { background: var(--panel-alt); }
+
+  .row-rank {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    width: 30px;
+    flex-shrink: 0;
+  }
+
+  .row-name {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46%;
+  }
+
+  .row-dots {
+    flex: 1;
+    height: 0;
+    margin: 0 10px;
+    border-bottom: 2px dotted var(--line);
+    align-self: center;
+    transform: translateY(-5px);
+  }
+
+  .row-value {
+    font-weight: 700;
+    font-size: 14.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .empty, .error {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 54px 20px;
+    font-size: 14px;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 11.5px;
+    margin-top: 26px;
+    letter-spacing: 0.2px;
+  }
+
+  @media (max-width: 460px) {
+    h1 { font-size: 19px; }
+    .prize.gold-slot { padding-top: 20px; }
+    .row-name { max-width: 38%; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="marquee">
+      <div class="bulb-row"></div>
+      <div class="marquee-inner">
+        <div class="coin-badge">🪙</div>
+        <h1>COOL<br>LEADERBOARD</h1>
+        <p class="subtitle" id="subtitle">Loading standings…</p>
+      </div>
+      <div class="bulb-row dim"></div>
+    </div>
+
+    <div class="toggle">
+      <button id="btnCoins" class="active">Cool Coins</button>
+      <button id="btnXp">XP &amp; Level</button>
+    </div>
+
+    <div id="podium" class="podium"></div>
+    <div id="board" class="board"></div>
+
+    <footer id="updatedAt"></footer>
+  </div>
+
+<script>
+  const DATA_URL = 'leaderboard.json';
+  const REFRESH_MS = 30000;
+  let mode = 'coins'; // 'coins' | 'xp'
+  let data = null;
+
+  const root = document.documentElement;
+  const podiumEl = document.getElementById('podium');
+  const boardEl = document.getElementById('board');
+  const subtitleEl = document.getElementById('subtitle');
+  const updatedAtEl = document.getElementById('updatedAt');
+  const btnCoins = document.getElementById('btnCoins');
+  const btnXp = document.getElementById('btnXp');
+
+  btnCoins.addEventListener('click', () => setMode('coins'));
+  btnXp.addEventListener('click', () => setMode('xp'));
+
+  function setMode(newMode) {
+    mode = newMode;
+    btnCoins.classList.toggle('active', mode === 'coins');
+    btnXp.classList.toggle('active', mode === 'xp');
+    root.style.setProperty('--accent', mode === 'coins' ? 'var(--gold)' : 'var(--cyan)');
+    root.style.setProperty('--accent-ink', mode === 'coins' ? '#241705' : '#062631');
+    render();
+  }
+
+  async function fetchData() {
+    try {
+      const res = await fetch(DATA_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('not found');
+      data = await res.json();
+      subtitleEl.textContent = data.guildName ? `Live standings — ${data.guildName}` : 'Live standings';
+      render();
+    } catch (e) {
+      subtitleEl.textContent = '';
+      boardEl.innerHTML = '<div class="error">No leaderboard data yet — leaderboard.json hasn\'t been exported by the bot.</div>';
+      podiumEl.innerHTML = '';
+    }
+  }
+
+  function render() {
+    if (!data) return;
+    const entries = mode === 'coins' ? data.byCoins : data.byXp;
+    updatedAtEl.textContent = data.updatedAt ? `Last updated ${new Date(data.updatedAt).toLocaleString()}` : '';
+
+    if (!entries || entries.length === 0) {
+      podiumEl.innerHTML = '';
+      boardEl.innerHTML = '<div class="empty">No one has earned anything yet. Get chatting!</div>';
+      return;
+    }
+
+    renderPodium(entries.slice(0, 3));
+    renderBoard(entries.slice(3, 25));
+  }
+
+  function statLine(u) {
+    return mode === 'coins' ? u.coins.toLocaleString() : `Lvl ${u.level}`;
+  }
+
+  function subLine(u) {
+    return mode === 'coins' ? `Lvl ${u.level}` : `${u.xp.toLocaleString()} XP`;
+  }
+
+  function renderPodium(top3) {
+    const slots = [
+      { cls: 'silver-slot', label: '2ND', entry: top3[1] },
+      { cls: 'gold-slot', label: '1ST', entry: top3[0] },
+      { cls: 'bronze-slot', label: '3RD', entry: top3[2] },
+    ];
+    podiumEl.innerHTML = slots.map(s => {
+      if (!s.entry) return `<div class="prize ${s.cls}"></div>`;
+      return `
+        <div class="prize ${s.cls}">
+          <div class="prize-rank">${s.label}</div>
+          <div class="prize-name">${escapeHtml(s.entry.username)}</div>
+          <div class="prize-stat">${statLine(s.entry)}</div>
+          <div class="prize-sub">${subLine(s.entry)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderBoard(rest) {
+    if (rest.length === 0) { boardEl.innerHTML = ''; return; }
+    boardEl.innerHTML = rest.map(u => `
+      <div class="row">
+        <div class="row-rank">${String(u.rank).padStart(2, '0')}</div>
+        <div class="row-name">${escapeHtml(u.username)}</div>
+        <div class="row-dots"></div>
+        <div class="row-value">${statLine(u)}</div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  fetchData();
+  setInterval(fetchData, REFRESH_MS);
+</script>
+</body>
+</html>
